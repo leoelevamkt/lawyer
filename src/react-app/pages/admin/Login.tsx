@@ -14,21 +14,10 @@ export default function AdminLogin() {
 
   useEffect(() => {
     // Check if user is already logged in
-    const checkSession = async () => {
-      try {
-        const response = await fetch('/api/users/session', {
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          navigate('/admin/dashboard');
-        }
-      } catch (error) {
-        // User not logged in, which is fine
-      }
-    };
-
-    checkSession();
+    const isLoggedIn = localStorage.getItem('admin_logged_in') === 'true';
+    if (isLoggedIn) {
+      navigate('/admin/dashboard');
+    }
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,20 +26,12 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
+      // Mock authentication - in production, this would be a real API call
+      if (formData.username === 'admin' && formData.password === '123456') {
+        localStorage.setItem('admin_logged_in', 'true');
         navigate('/admin/dashboard');
       } else {
-        const data = await response.json();
-        setError(data.error || 'Erro ao fazer login');
+        setError('Credenciais inválidas');
       }
     } catch (error) {
       setError('Erro de conexão');

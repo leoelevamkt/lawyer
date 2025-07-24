@@ -12,9 +12,15 @@ interface User {
   username: string;
   email: string;
   role: string;
-  isAdmin: boolean;
-  adminRole: string;
 }
+
+// Mock user data
+const mockUser: User = {
+  id: 1,
+  username: 'admin',
+  email: 'admin@olympusadvogados.com.br',
+  role: 'Administrador'
+};
 
 export default function AdminLayout({ children, title }: AdminLayoutProps) {
   const [user, setUser] = useState<User | null>(null);
@@ -26,13 +32,11 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/users/session', {
-          credentials: 'include'
-        });
+        // Check if user is logged in (mock implementation)
+        const isLoggedIn = localStorage.getItem('admin_logged_in') === 'true';
         
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
+        if (isLoggedIn) {
+          setUser(mockUser);
         } else {
           navigate('/admin');
         }
@@ -48,10 +52,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/logout-simple', {
-        method: 'POST',
-        credentials: 'include'
-      });
+      localStorage.removeItem('admin_logged_in');
       navigate('/admin');
     } catch (error) {
       console.error('Logout error:', error);

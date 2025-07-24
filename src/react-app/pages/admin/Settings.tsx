@@ -9,45 +9,34 @@ interface SiteSettings {
   };
 }
 
+// Mock settings data
+const mockSettings: SiteSettings = {
+  site_name: { value: 'OLYMPUS', type: 'text' },
+  site_description: { value: 'Excelência jurídica que você pode confiar', type: 'text' },
+  hero_title: { value: 'Excelência Jurídica Que Você Pode Confiar', type: 'text' },
+  hero_subtitle: { value: 'No Olympus Advogados, transformamos desafios jurídicos em soluções estratégicas. Sua segurança jurídica é nossa prioridade.', type: 'textarea' },
+  about_title: { value: 'Tradição e Inovação Jurídica', type: 'text' },
+  about_description: { value: 'Há mais de 25 anos oferecendo soluções jurídicas de excelência, combinando experiência consolidada com as mais modernas práticas do direito.', type: 'textarea' },
+  primary_color: { value: '#eab308', type: 'color' },
+  secondary_color: { value: '#1f2937', type: 'color' },
+  contact_phone: { value: '(11) 3456-7890', type: 'text' },
+  contact_email: { value: 'contato@olympusadvogados.com.br', type: 'email' },
+  contact_address: { value: 'Av. Paulista, 1.400 - 15º andar\nBela Vista, São Paulo - SP\nCEP: 01310-100', type: 'textarea' },
+  whatsapp_number: { value: '5511987654321', type: 'text' }
+};
+
 export default function AdminSettings() {
-  const [settings, setSettings] = useState<SiteSettings>({});
-  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<SiteSettings>(mockSettings);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
-    try {
-      const response = await fetch('/api/settings');
-      if (response.ok) {
-        const data = await response.json();
-        setSettings(data.settings);
-      }
-    } catch (error) {
-      console.error('Error fetching settings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await fetch('/api/admin/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ settings })
-      });
-
-      if (response.ok) {
-        alert('Configurações salvas com sucesso!');
-      }
+      // In a real app, you would save to an API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert('Configurações salvas com sucesso!');
     } catch (error) {
       console.error('Error saving settings:', error);
       alert('Erro ao salvar configurações');
@@ -71,16 +60,6 @@ export default function AdminSettings() {
     { id: 'design', label: 'Design', icon: Palette },
     { id: 'contact', label: 'Contato', icon: SettingsIcon },
   ];
-
-  if (loading) {
-    return (
-      <AdminLayout title="Configurações">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-        </div>
-      </AdminLayout>
-    );
-  }
 
   return (
     <AdminLayout title="Configurações">

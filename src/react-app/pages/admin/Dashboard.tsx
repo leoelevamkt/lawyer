@@ -9,42 +9,50 @@ interface DashboardStats {
   totalViews: number;
 }
 
+// Mock data
+const mockStats: DashboardStats = {
+  totalPosts: 15,
+  publishedPosts: 12,
+  draftPosts: 3,
+  totalViews: 8547
+};
+
+const mockRecentPosts = [
+  {
+    id: 1,
+    title: "Reforma Trabalhista: O que mudou para as empresas",
+    author: "Dr. Carlos Mendoza",
+    category: "Direito Trabalhista",
+    is_published: true,
+    created_at: "2024-01-15T10:00:00Z"
+  },
+  {
+    id: 2,
+    title: "LGPD: Como adequar sua empresa",
+    author: "Dra. Juliana Santos",
+    category: "Direito Digital",
+    is_published: true,
+    created_at: "2024-01-10T14:30:00Z"
+  },
+  {
+    id: 3,
+    title: "Direito de Família: Guarda Compartilhada",
+    author: "Dra. Marina Silva",
+    category: "Direito de Família",
+    is_published: false,
+    created_at: "2024-01-05T09:15:00Z"
+  }
+];
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalPosts: 0,
-    publishedPosts: 0,
-    draftPosts: 0,
-    totalViews: 0
-  });
-  const [recentPosts, setRecentPosts] = useState([]);
+  const [stats, setStats] = useState<DashboardStats>(mockStats);
+  const [recentPosts, setRecentPosts] = useState(mockRecentPosts);
 
   useEffect(() => {
-    fetchDashboardData();
+    // In a real app, you would fetch data from an API
+    setStats(mockStats);
+    setRecentPosts(mockRecentPosts);
   }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      const response = await fetch('/api/admin/blog/posts', {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const posts = data.posts;
-        
-        setStats({
-          totalPosts: posts.length,
-          publishedPosts: posts.filter((p: any) => p.is_published).length,
-          draftPosts: posts.filter((p: any) => !p.is_published).length,
-          totalViews: Math.floor(Math.random() * 10000) + 5000 // Mock data
-        });
-        
-        setRecentPosts(posts.slice(0, 5));
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    }
-  };
 
   const statCards = [
     {

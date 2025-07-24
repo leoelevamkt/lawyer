@@ -18,9 +18,43 @@ interface BlogPost {
   updated_at: string;
 }
 
+// Mock data
+const mockPosts: BlogPost[] = [
+  {
+    id: 1,
+    title: "Reforma Trabalhista: O que mudou para as empresas",
+    slug: "reforma-trabalhista-mudancas-empresas",
+    excerpt: "Entenda as principais mudanças da reforma trabalhista e como elas impactam as relações de trabalho nas empresas.",
+    content: "Conteúdo completo do artigo sobre reforma trabalhista...",
+    author: "Dr. Carlos Mendoza",
+    category: "Direito Trabalhista",
+    image_url: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f",
+    tags: ["Reforma Trabalhista", "Empresas", "Legislação"],
+    is_published: true,
+    read_time: "5 min",
+    created_at: "2024-01-15T10:00:00Z",
+    updated_at: "2024-01-15T10:00:00Z"
+  },
+  {
+    id: 2,
+    title: "LGPD: Como adequar sua empresa",
+    slug: "lgpd-adequacao-empresa",
+    excerpt: "Guia completo para adequar sua empresa à LGPD.",
+    content: "Conteúdo completo do artigo sobre LGPD...",
+    author: "Dra. Juliana Santos",
+    category: "Direito Digital",
+    image_url: "https://images.unsplash.com/photo-1563986768609-322da13575f3",
+    tags: ["LGPD", "Proteção de Dados", "Compliance"],
+    is_published: true,
+    read_time: "7 min",
+    created_at: "2024-01-10T14:30:00Z",
+    updated_at: "2024-01-10T14:30:00Z"
+  }
+];
+
 export default function AdminBlog() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<BlogPost[]>(mockPosts);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [showModal, setShowModal] = useState(false);
@@ -37,27 +71,6 @@ export default function AdminBlog() {
     is_published: true,
     read_time: ''
   });
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch('/api/admin/blog/posts', {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setPosts(data.posts);
-      }
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,35 +89,30 @@ export default function AdminBlog() {
     };
 
     try {
-      const url = editingPost 
-        ? `/api/admin/blog/posts/${editingPost.id}`
-        : '/api/admin/blog/posts';
-      
-      const method = editingPost ? 'PUT' : 'POST';
-      
-      console.log('Sending post data:', postData);
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(postData)
-      });
-
-      if (response.ok) {
-        await fetchPosts();
-        setShowModal(false);
-        resetForm();
+      if (editingPost) {
+        // Update existing post
+        const updatedPosts = posts.map(post => 
+          post.id === editingPost.id 
+            ? { ...post, ...postData, updated_at: new Date().toISOString() }
+            : post
+        );
+        setPosts(updatedPosts);
       } else {
-        const errorData = await response.text();
-        console.error('Server error:', response.status, errorData);
-        alert(`Erro ao salvar post: ${response.status} - ${errorData}`);
+        // Create new post
+        const newPost: BlogPost = {
+          id: Date.now(),
+          ...postData,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setPosts([newPost, ...posts]);
       }
+      
+      setShowModal(false);
+      resetForm();
     } catch (error) {
       console.error('Error saving post:', error);
-      alert('Erro ao salvar post: ' + error);
+      alert('Erro ao salvar post');
     }
   };
 
@@ -112,14 +120,7 @@ export default function AdminBlog() {
     if (!confirm('Tem certeza que deseja excluir este post?')) return;
 
     try {
-      const response = await fetch(`/api/admin/blog/posts/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        await fetchPosts();
-      }
+      setPosts(posts.filter(post => post.id !== id));
     } catch (error) {
       console.error('Error deleting post:', error);
     }
@@ -185,16 +186,6 @@ export default function AdminBlog() {
   });
 
   const categories = Array.from(new Set(posts.map(post => post.category)));
-
-  if (loading) {
-    return (
-      <AdminLayout title="Gerenciar Blog">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-        </div>
-      </AdminLayout>
-    );
-  }
 
   return (
     <AdminLayout title="Gerenciar Blog">
